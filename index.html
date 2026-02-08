@@ -9,7 +9,7 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
-<body>
+<body data-density="cozy">
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
   <div class="noise" aria-hidden="true"></div>
 
@@ -33,21 +33,35 @@
       </nav>
 
       <div class="top-actions">
+        <button id="palette-toggle-btn" class="btn btn-ghost" aria-label="Open command palette" data-tooltip="Command Palette (Ctrl/Cmd+K)">Command</button>
         <button id="new-patch-btn" class="btn btn-ghost" aria-label="Generate New Patch">New Patch</button>
+        <label class="control-inline" for="density-select" data-tooltip="Adjust spacing density">
+          <span>Density</span>
+          <select id="density-select" aria-label="Density mode">
+            <option value="compact">Compact</option>
+            <option value="cozy" selected>Cozy</option>
+            <option value="expanded">Expanded</option>
+          </select>
+        </label>
         <label class="chaos-toggle" for="chaos-toggle-input" aria-label="Toggle Chaos Mode">
           <input id="chaos-toggle-input" type="checkbox" />
-          <span>Chaos Mode</span>
+          <span>Chaos</span>
         </label>
+        <button id="inspector-toggle-btn" class="btn btn-ghost" aria-label="Toggle inspector panel" aria-pressed="true" data-tooltip="Toggle inspector">Inspector</button>
+        <button id="inspector-mobile-btn" class="btn btn-ghost mobile-only" aria-label="Open inspector panel">Inspector</button>
       </div>
     </header>
 
     <div class="layout">
       <aside class="status-rail" id="status-rail" aria-label="Reality Status"></aside>
       <main class="stage" id="app-main" tabindex="-1"></main>
+      <aside class="inspector-rail" id="inspector-panel" aria-label="Inspector"></aside>
     </div>
   </div>
 
   <div id="modal-root"></div>
+  <div id="drawer-root"></div>
+  <div id="toast-root" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
   <noscript>
     <div class="noscript">RealityOps needs JavaScript to pilot this timeline.</div>

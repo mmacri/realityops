@@ -1,4 +1,4 @@
-const CACHE_VERSION = "realityops-v1-2026-02-08-2";
+const CACHE_VERSION = "realityops-v1-2026-02-08-3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,11 @@ const CORE_ASSETS = [
   "./assets/js/app.js",
   "./assets/js/router.js",
   "./assets/js/ui.js",
+  "./assets/js/components.js",
+  "./assets/js/palette.js",
+  "./assets/js/briefing.js",
+  "./assets/js/visuals.js",
+  "./assets/js/lint.js",
   "./assets/js/generators.js",
   "./assets/js/storage.js",
   "./assets/js/sw-register.js",

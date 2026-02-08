@@ -55,8 +55,18 @@ export function navigate(path, params = {}) {
   window.location.hash = buildHash(path, params);
 }
 
-export function initRouter(onRoute) {
-  const run = () => onRoute(getCurrentRoute());
+export function initRouter(onRoute, hooks = {}) {
+  const { beforeEach = null, afterEach = null } = hooks;
+  const run = async () => {
+    const route = getCurrentRoute();
+    if (typeof beforeEach === "function") {
+      await beforeEach(route);
+    }
+    await onRoute(route);
+    if (typeof afterEach === "function") {
+      await afterEach(route);
+    }
+  };
   window.addEventListener("hashchange", run);
   run();
 }

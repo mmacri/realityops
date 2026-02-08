@@ -208,6 +208,16 @@ function normalizeText(input) {
     .trim();
 }
 
+function stableHash(input) {
+  const text = typeof input === "string" ? input : JSON.stringify(input);
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    h ^= text.charCodeAt(i);
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+  }
+  return `h_${(h >>> 0).toString(36)}`;
+}
+
 function summarizeSignature(tool, signature) {
   return `${tool}|${signature}`;
 }
@@ -644,7 +654,9 @@ export async function createGeneratorEngine() {
         },
         rng
       );
-      const controls = pickManyUnique(data.controls, 3, rng).map((line) => fillTemplate(line, { scenario: chosenScenario }, rng));
+      const controls = pickManyUnique(data.controls, rng.int(6, 10), rng).map((line) =>
+        fillTemplate(line, { scenario: chosenScenario }, rng)
+      );
 
       const text = [
         `Scenario: ${chosenScenario}`,
@@ -669,6 +681,47 @@ export async function createGeneratorEngine() {
     };
 
     return withSeen("probability", seed, build, { enforceUnseen, trackSeen, resetThreshold: 760 });
+  }
+
+  function getProbabilityControlEffects({ seed, controls = [] } = {}) {
+    const baseSeed = normalizeSeed(seed);
+    return controls.map((control, idx) => {
+      const rng = createRng(`${baseSeed}:control:${idx}:${control}`);
+      const raw = rng.int(1, 5);
+      const sign = rng.bool(0.84) ? -1 : 1;
+      const delta = sign * raw;
+      return {
+        index: idx,
+        control,
+        delta
+      };
+    });
+  }
+
+  function simulateProbabilityControls({
+    seed,
+    baseScore,
+    controls = [],
+    selectedIndexes = []
+  } = {}) {
+    const beforeScore = clamp(Number(baseScore) || 1, 1, 99);
+    const effects = getProbabilityControlEffects({ seed, controls });
+    const picked = new Set((selectedIndexes || []).map((item) => Number(item)).filter((n) => Number.isInteger(n)));
+    const applied = effects.filter((row) => picked.has(row.index));
+    const totalDelta = applied.reduce((sum, row) => sum + row.delta, 0);
+    const afterScore = clamp(beforeScore + totalDelta, 1, 99);
+
+    const toBand = (score) => (score <= 33 ? "GREEN" : score <= 66 ? "YELLOW" : "RED");
+
+    return {
+      beforeScore,
+      afterScore,
+      beforeBand: toBand(beforeScore),
+      afterBand: toBand(afterScore),
+      totalDelta,
+      effects,
+      applied
+    };
   }
 
   function generateNpc({
@@ -732,7 +785,8 @@ export async function createGeneratorEngine() {
     const build = (candidateSeed) => {
       const rng = createRng(`${candidateSeed}:incident:${chaosMode ? 1 : 0}`);
       const severity = rng.weighted(data.severityLevels, (item) => chaosWeight(item, chaosMode));
-      const system = rng.pick(data.impactedSystems);
+      const impactedSystems = pickManyUnique(data.impactedSystems, rng.int(2, 4), rng);
+      const system = impactedSystems[0] || rng.pick(data.impactedSystems);
       const symptom = rng.pick(data.symptoms);
       const owner = rng.pick(data.owners);
       const id = `${severity.level}-${rng.int(1000, 9999)}`;
@@ -811,6 +865,7 @@ export async function createGeneratorEngine() {
         title,
         startTime: formatClock(startMinute),
         duration,
+        impactedSystems,
         impact,
         timeline,
         rootCause,
@@ -940,6 +995,7 @@ export async function createGeneratorEngine() {
   return {
     manifest,
     packs,
+    stableHash,
     normalizeSeed,
     nextSeed,
     randomSeed,
@@ -949,6 +1005,8 @@ export async function createGeneratorEngine() {
     generateMemo,
     generateTranslation,
     generateProbability,
+    getProbabilityControlEffects,
+    simulateProbabilityControls,
     generateNpc,
     generateIncident,
     generateTarot,
