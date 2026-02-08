@@ -1,0 +1,11 @@
+{
+  "name": "RealityOps — Over-Engineered Multiverse Control Room",
+  "short_name": "RealityOps",
+  "description": "Enterprise control room satire with seeded generators and offline packs.",
+  "start_url": "./index.html#/",
+  "display": "standalone",
+  "background_color": "#0d121b",
+  "theme_color": "#0d121b",
+  "lang": "en",
+  "icons": []
+}
