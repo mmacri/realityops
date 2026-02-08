@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RealityOps Redirect</title>
+</head>
+<body>
+  <p>Redirecting to RealityOps...</p>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var base = path.replace(/[^/]*$/, "");
+      var route = "/";
+      if (path && !path.endsWith("/404.html")) {
+        var segments = path.split("/").filter(Boolean);
+        if (segments.length > 1) {
+          route = "/" + segments.slice(1).join("/");
+        }
+      }
+      var target = window.location.origin + base + "index.html#" + route + (window.location.search || "");
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>
